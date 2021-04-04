@@ -1,0 +1,48 @@
+{% extends "layout.html" %}
+{% block content %}
+<h1>Users</h1>
+<hr>
+<h2>Waiters</h2>
+<ul>
+    {% for waiter in waiters %}
+    <li>{{ waiter[1] }} <a href="/users/{{ waiter[0] }}">Edit</a></li>
+    {% endfor %}
+</ul>
+<hr />
+<h2>Table users</h2>
+<ul>
+    {% for tableuser in tableusers %}
+    <li>{{ tableuser[1] }} <a href="/users/{{ tableuser[0] }}">Edit</a></li>
+    {% endfor %}
+</ul>
+<h2>Admins</h2>
+<ul>
+    {% for admin in admins %}
+    <li>{{ admin[1] }} <a href="/users/{{ admin[0] }}">Edit</a></li>
+    {% endfor %}
+</ul>
+
+<h2>Add user</h2>
+<form action="/users" method="POST">
+    <label for="username">
+        Username:
+        <input name="username" required />
+    </label>
+    <br />
+    <label for="password">
+        Password:
+        <input name="password" type="password" required />
+    </label>
+    <br />
+    <label for="type">
+        User type:
+        <select name="userType" required>
+            <option value="table">Table</option>
+            <option value="waiter">Waiter</option>
+            <option value="admin">Admin</option>
+        </select>
+    </label>
+    <br />
+    <input type="submit" value="Add">
+</form>
+{% endblock %}

@@ -1,0 +1,30 @@
+{% extends "layout.html" %}
+{% block title %}Orders{% endblock %}
+{% block content %}
+<h1>{{ table[1] }}</h1>
+
+Hello! Your waiter today is <span class="waiter">{{ waiterName }}</span>.
+
+<h2>Orders</h2>
+
+<a href="/order">Make a new order</a>
+
+<ul>
+    {% for order in orders %}
+    <li>Order #{{ loop.index }}, Status: <span class="{{order[1]}}">{{order[1]}}</span>
+        <a href="/cancelOrder/{{ order[0] }}">Cancel order</a>
+        <div class="collapse">
+            <ul>
+                {% for orderItem in orderItems %}
+                    {% if orderItem[0] == order[0] %}
+                        <li>{{ orderItem[2] }} á {{ orderItem[3] }} €<br />x {{ orderItem[1] }} = {{ orderItem[1] *  orderItem[3] | round(2)}}</li>
+                    {% endif %}
+                {% endfor %}
+            </ul>
+        </div>
+        Order total: <span class="total">{{ orderTotals[loop.index0][1] | round(2) }} €</span>
+    </li>
+    {% endfor %}
+</ul>
+<p class="grand-total">Grand total: {{ grandTotal }} €</p>
+{% endblock %}

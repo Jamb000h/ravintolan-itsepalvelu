@@ -1,0 +1,22 @@
+{% extends "layout.html" %}
+{% block title %}New order{% endblock %}
+{% block content %}
+<h1>Make a new order</h1>
+<form action="/order" method="POST">
+
+    {% for menuItemCategory in menuItemCategories %}
+        <h2>{{menuItemCategory[0]|title}}s</h2>
+        {% for menuItem in menuItems if menuItem[4] == menuItemCategory[0]%}
+            <input type="hidden" name="menuItemId" value="{{ menuItem[0] }}" />
+            <label for="menuItem{{ menuItem[0] }}">
+                {{ menuItem[1] }} á {{ menuItem[2] | round(2) }} €<br />
+                {{ menuItem[3] }} <br />
+                <input name="menuItemQty" id="menuItem{{ menuItem[0] }}" type="number"/>
+            </label>
+        {% endfor %}
+    {% endfor %}
+
+    <input name="tableId" type="hidden" value="{{tableId}}" />
+    <input type="submit" value="Order" />
+</form>
+{% endblock %}

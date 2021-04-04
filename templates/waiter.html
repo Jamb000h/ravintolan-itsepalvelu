@@ -1,0 +1,37 @@
+{% extends "layout.html" %}
+{% block title %}Your orders{% endblock %}
+{% block content %}
+<h1>{{ waiter[1] }}</h1>
+
+<h2>Pending orders, oldest on top</h2>
+
+<ul>
+    <li>
+        Table 2 at 11:23, status: <span class="status">status</span>
+        <ul>
+            <li>
+                Item 1 x 3
+            </li>
+            <li>
+                Item 7 x 5
+            </li>
+        </ul>
+        <a href="/proceedOrder/{{ order[0] }}">TODO: mark as in progress</a>
+        <a href="/proceedOrder/{{ order[0] }}">TODO: mark as completed</a>
+        <a href="/cancelOrder/{{ order[0] }}">Cancel order</a>
+    </li>
+</ul>
+
+<h2>Your tables</h2>
+
+<ul>
+    <li>
+        Table 1
+        <a href="#">TODO: mark bill as paid</a>
+    </li>
+    <li>
+        Table 2
+        <a href="#">TODO: mark bill as paid</a>
+    </li>
+</ul>
+{% endblock %}

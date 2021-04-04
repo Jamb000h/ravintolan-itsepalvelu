@@ -1,0 +1,32 @@
+{% extends "layout.html" %}
+{% block content %}
+<h1>Edit {{ menuItem[1] }}</h1>
+<form action="/menu/{{ menuItem[0] }}" method="POST">
+    <label for="itemName">
+        Item name:
+        <input name="itemName" value="{{ menuItem[1] }}" required/>
+    </label>
+    <br />
+    <label for="itemPrice">
+        Item price:
+        <input name="itemPrice" type="number" value="{{ menuItem[2] }}" step="0.01" required/>
+    </label>
+    <br />
+    <label for="itemCategory">
+        Item category:
+        <select name="itemCategory">
+            <option value="appetizer" {% if menuItem[3]== "appetizer" %} selected {% endif %}>Appetizer</option>
+            <option value="main" {% if menuItem[3]== "main" %} selected {% endif %}>Main course</option>
+            <option value="dessert" {% if menuItem[3]== "dessert" %} selected {% endif %}>Dessert</option>
+            <option value="beverage" {% if menuItem[3]== "beverage" %} selected {% endif %}>Beverage</option>
+        </select>
+    </label>
+    <br />
+    <label for="itemDescription">
+        Item description:
+        <textarea name="itemDescription" required>{{ menuItem[4] }}</textarea>
+    </label>
+    <br />
+    <input type="submit" value="Save">
+</form>
+{% endblock %}

@@ -1,0 +1,40 @@
+{% extends "layout.html" %}
+{% block content %}
+<h1>Menu</h1>
+
+<ul>
+    {% for menuItem in menuItems %}
+        <li>{{ menuItem[1] }} <a href="/menu/{{ menuItem[0] }}">Edit</a></li>
+    {% endfor %}
+</ul>
+
+<h2>Add new menu item</h2>
+<form action="/menu" method="POST">
+    <label for="itemName">
+        Item name:
+        <input name="itemName" required />
+    </label>
+    <br />
+    <label for="itemPrice">
+        Item price:
+        <input name="itemPrice" type="number" step="0.01" required />
+    </label>
+    <br />
+    <label for="itemCategory">
+        Item category:
+        <select name="itemCategory" required>
+            <option value="appetizer">Appetizer</option>
+            <option value="main">Main course</option>
+            <option value="dessert">Dessert</option>
+            <option value="beverage">Beverage</option>
+        </select>
+    </label>
+    <br />
+    <label for="itemDescription" required>
+        Item description:
+        <textarea name="itemDescription"></textarea>
+    </label>
+    <br />
+    <input type="submit" value="Add">
+</form>
+{% endblock %}

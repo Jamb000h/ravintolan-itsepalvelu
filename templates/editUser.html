@@ -1,0 +1,13 @@
+{% extends "layout.html" %}
+{% block content %}
+<h1>Editing {{ user[1] }}</h1>
+<a href="">TODO: delete user</a>
+<form action="/users/{{ user[0] }}" method="POST">
+    <label for="username">
+        Username:
+        <input name="username" value="{{ user[1] }}" required />
+    </label>
+    <br />
+    <input type="submit" value="Save">
+</form>
+{% endblock %}

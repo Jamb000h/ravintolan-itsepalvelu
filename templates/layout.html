@@ -1,0 +1,16 @@
+<!doctype html>
+<title>{% block title %}{% endblock %}</title>
+<ul>
+    {% if session.userType == "admin" %}
+        <li><a href="/users">Users</a></li>
+        <li><a href="/tables">Tables</a></li>
+        <li><a href="/menu">Menu</a></li>
+    {% endif %}
+    {% if session.userType == "table" %}
+        <li><a href="/order">Order</a></li>
+        <li><a href="/table">Table</a></li>
+    {% endif %}
+    <li><a href="/logout">Log out</a></li>
+</ul>
+<hr>
+{% block content %}{% endblock %}

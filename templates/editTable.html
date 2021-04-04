@@ -1,0 +1,30 @@
+{% extends "layout.html" %}
+{% block content %}
+<h1>Edit {{ table[1] }}</h1>
+<form action="/tables/{{ table[0] }}" method="POST">
+    <label for="tableName">
+        Table name:
+        <input name="tableName" value="{{ table[1] }}" required/>
+    </label>
+    <br />
+    <label for="tableWaiter">
+        Waiter:
+        <select name="tableWaiter" required>
+            {% for waiter in waiters %}
+                <option value="{{ waiter[0] }}" {% if table[2] == waiter[0] %} selected {% endif %}>{{ waiter[1] }}</option>
+            {% endfor %}
+        </select>
+    </label>
+    <br />
+    <label for="tableUser">
+        Table user:
+        <select name="tableUser" required>
+            {% for tableUser in tableUsers %}
+                <option value="{{ tableUser[0] }}" {% if table[3] == tableUser[0] %} selected {% endif %}>{{ tableUser[1] }}</option>
+            {% endfor %}
+        </select>
+    </label>
+    <br />
+    <input type="submit" value="Save">
+</form>
+{% endblock %}
