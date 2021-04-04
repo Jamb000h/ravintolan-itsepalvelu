@@ -12,7 +12,7 @@ app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 app.config["SQLALCHEMY_DATABASE_URI"] = getenv("DATABASE_URL")
 db = SQLAlchemy(app)
 
-# Initialize by adding an admin user
+# Initialize by adding an admin user and clear sessions
 sql = "SELECT id FROM users"
 result = db.session.execute(sql)
 user = result.fetchone()
@@ -20,7 +20,7 @@ user = result.fetchone()
 if user is None:
     hash_value = generate_password_hash('admin')
     sql = "INSERT INTO users (username,password,userType) VALUES ('admin',:password,'admin')"
-    db.session.execute(sql, {"password":hash_value})
+    db.session.execute(sql, {"password": hash_value})
     db.session.commit()
 
 # Routes
@@ -37,21 +37,23 @@ def index():
         return render_template("index.html")
     return render_template("login.html")
 
-@app.route("/login",methods=["POST"])
+
+@app.route("/login", methods=["POST"])
 def login():
     username = request.form["username"]
     password = request.form["password"]
 
     sql = "SELECT id, userType, password FROM users WHERE username=:username"
-    result = db.session.execute(sql, {"username":username})
+    result = db.session.execute(sql, {"username": username})
     user = result.fetchone()
     if user != None:
         hash_value = user[2]
-        if check_password_hash(hash_value,password):
+        if check_password_hash(hash_value, password):
             session["username"] = username
             session["userId"] = user[0]
             session["userType"] = user[1]
     return redirect("/")
+
 
 @app.route("/logout")
 def logout():
@@ -62,6 +64,7 @@ def logout():
     if session.get("userId") is not None:
         del session["userId"]
     return redirect("/")
+
 
 @app.route("/users", methods=["GET", "POST"])
 def users():
@@ -77,7 +80,7 @@ def users():
 
             # Check that the username is not reserved and inform user if reserved
             sql = "SELECT id FROM users WHERE username=:username"
-            result = db.session.execute(sql, {"username":username})
+            result = db.session.execute(sql, {"username": username})
             user = result.fetchone()
 
             if user is not None:
@@ -85,25 +88,30 @@ def users():
 
             hash_value = generate_password_hash(password)
             sql = "INSERT INTO users (username,password,userType) VALUES (:username,:password,:userType)"
-            db.session.execute(sql, {"username":username,"password":hash_value,"userType":userType})
+            db.session.execute(
+                sql, {"username": username, "password": hash_value, "userType": userType})
             db.session.commit()
             return redirect("/users")
         except:
             pass
 
     # Get waiters
-    result = db.session.execute("SELECT id, username, userType FROM users WHERE userType = 'waiter'")
+    result = db.session.execute(
+        "SELECT id, username, userType FROM users WHERE userType = 'waiter'")
     waiters = result.fetchall()
 
     # Get table users
-    result = db.session.execute("SELECT id, username, userType FROM users WHERE userType = 'table'")
+    result = db.session.execute(
+        "SELECT id, username, userType FROM users WHERE userType = 'table'")
     tableusers = result.fetchall()
 
     # Get admins
-    result = db.session.execute("SELECT id, username, userType FROM users WHERE userType = 'admin'")
+    result = db.session.execute(
+        "SELECT id, username, userType FROM users WHERE userType = 'admin'")
     admins = result.fetchall()
 
     return render_template("users.html", waiters=waiters, tableusers=tableusers, admins=admins)
+
 
 @app.route("/users/<id>", methods=["GET", "POST"])
 def editUser(id):
@@ -117,7 +125,7 @@ def editUser(id):
 
         # Check that the username is not reserved and inform user if reserved
         sql = "SELECT id FROM users WHERE username=:username"
-        result = db.session.execute(sql, {"username":username})
+        result = db.session.execute(sql, {"username": username})
         user = result.fetchone()
 
         if user is not None:
@@ -126,7 +134,8 @@ def editUser(id):
         try:
             hash_value = generate_password_hash(password)
             sql = "UPDATE users SET username=:username, password=:password WHERE id = :id"
-            db.session.execute(sql, {"username": username, "password": hash_value, "id":id})
+            db.session.execute(
+                sql, {"username": username, "password": hash_value, "id": id})
             db.session.commit()
             return redirect("/users/"+id)
         except:
@@ -138,6 +147,7 @@ def editUser(id):
     if user is None:
         return redirect("/users")
     return render_template("editUser.html", user=user)
+
 
 @app.route("/menu", methods=["GET", "POST"])
 def menu():
@@ -154,14 +164,15 @@ def menu():
 
             # Check that the item name is not reserved and inform user if reserved
             sql = "SELECT id FROM menuItems WHERE itemName=:itemName"
-            result = db.session.execute(sql, {"itemName":itemName})
+            result = db.session.execute(sql, {"itemName": itemName})
             menuItem = result.fetchone()
 
             if menuItem is not None:
                 return redirect("/menu?duplicateNameError")
 
             sql = "INSERT INTO menuItems (itemName,itemPrice,itemCategory,itemDescription) VALUES (:itemName,:itemPrice,:itemCategory,:itemDescription)"
-            db.session.execute(sql, {"itemName":itemName,"itemPrice":itemPrice,"itemCategory":itemCategory,"itemDescription":itemDescription})
+            db.session.execute(sql, {"itemName": itemName, "itemPrice": itemPrice,
+                               "itemCategory": itemCategory, "itemDescription": itemDescription})
             db.session.commit()
             return redirect("/menu")
         except:
@@ -169,8 +180,9 @@ def menu():
 
     sql = "SELECT id, itemName, itemPrice, itemDescription, itemCategory FROM menuItems"
     result = db.session.execute(sql)
-    menuItems = result.fetchall() 
+    menuItems = result.fetchall()
     return render_template("menu.html", menuItems=menuItems)
+
 
 @app.route("/menu/<id>", methods=["GET", "POST"])
 def editMenuItem(id):
@@ -187,14 +199,15 @@ def editMenuItem(id):
 
             # Check that the item name is not reserved and inform user if reserved
             sql = "SELECT id FROM menuItems WHERE itemName=:itemName"
-            result = db.session.execute(sql, {"itemName":itemName})
+            result = db.session.execute(sql, {"itemName": itemName})
             menuItem = result.fetchone()
 
             if menuItem is not None:
                 return redirect("/menu/"+id+"?duplicateNameError")
 
             sql = "UPDATE menuItems SET itemName=:itemName, itemPrice=:itemPrice, itemCategory=:itemCategory, itemDescription=:itemDescription WHERE id = :id"
-            db.session.execute(sql, {"itemName":itemName, "itemPrice":itemPrice, "itemCategory":itemCategory, "itemDescription":itemDescription,"id":id})
+            db.session.execute(sql, {"itemName": itemName, "itemPrice": itemPrice,
+                               "itemCategory": itemCategory, "itemDescription": itemDescription, "id": id})
             db.session.commit()
             return redirect("/menu/"+id)
         except:
@@ -206,6 +219,7 @@ def editMenuItem(id):
     if menuItem is None:
         return redirect("/menu")
     return render_template("editMenuItem.html", menuItem=menuItem)
+
 
 @app.route("/tables", methods=["GET", "POST"])
 def tables():
@@ -221,7 +235,7 @@ def tables():
 
             # Check that the table name is not reserved and inform user if reserved
             sql = "SELECT id FROM tables WHERE tableName=:tableName"
-            result = db.session.execute(sql, {"tableName":tableName})
+            result = db.session.execute(sql, {"tableName": tableName})
             table = result.fetchone()
 
             if table is not None:
@@ -229,7 +243,7 @@ def tables():
 
             # Check waiter
             sql = "SELECT id FROM users WHERE id = :tableWaiter AND userType = 'waiter'"
-            result = db.session.execute(sql, {"tableWaiter":tableWaiter})
+            result = db.session.execute(sql, {"tableWaiter": tableWaiter})
             waiter = result.fetchone()
 
             if waiter is None:
@@ -237,7 +251,7 @@ def tables():
 
             # Check table user
             sql = "SELECT id FROM users WHERE id = :tableUser AND userType = 'table'"
-            result = db.session.execute(sql, {"tableUser":tableUser})
+            result = db.session.execute(sql, {"tableUser": tableUser})
             tUser = result.fetchone()
 
             if tUser is None:
@@ -245,14 +259,15 @@ def tables():
 
             # Check that the table user is free or reserved for this table
             sql = "SELECT id FROM tables WHERE userId = :tableUser"
-            result = db.session.execute(sql, {"tableUser":tableUser})
+            result = db.session.execute(sql, {"tableUser": tableUser})
             tables = result.fetchall()
 
             if len(tables) > 0 and tables[0][0] is not id:
                 return redirect("/tables?reservedUserError")
 
             sql = "INSERT INTO tables (tableName,waiterId,userId) VALUES (:tableName,:tableWaiter,:tableUser)"
-            db.session.execute(sql, {"tableName":tableName,"tableWaiter":tableWaiter,"tableUser":tableUser})
+            db.session.execute(
+                sql, {"tableName": tableName, "tableWaiter": tableWaiter, "tableUser": tableUser})
             db.session.commit()
             return redirect("/tables")
         except:
@@ -266,14 +281,15 @@ def tables():
     # Get waiters
     sql = "SELECT id, username FROM users WHERE userType = 'waiter'"
     result = db.session.execute(sql)
-    waiters = result.fetchall() 
+    waiters = result.fetchall()
 
     # Get free table users
     sql = "SELECT id, username FROM users WHERE userType = 'table' AND id NOT IN (SELECT userId FROM tables)"
     result = db.session.execute(sql)
-    tableUsers = result.fetchall() 
+    tableUsers = result.fetchall()
 
     return render_template("tables.html", tables=tables, waiters=waiters, tableUsers=tableUsers)
+
 
 @app.route("/tables/<id>", methods=["GET", "POST"])
 def editTable(id):
@@ -289,7 +305,7 @@ def editTable(id):
 
             # Check that the table name is not reserved and inform user if reserved
             sql = "SELECT id FROM tables WHERE tableName=:tableName"
-            result = db.session.execute(sql, {"tableName":tableName})
+            result = db.session.execute(sql, {"tableName": tableName})
             table = result.fetchone()
 
             if table is not None:
@@ -297,7 +313,7 @@ def editTable(id):
 
             # Check waiter
             sql = "SELECT id FROM users WHERE id = :tableWaiter AND userType = 'waiter'"
-            result = db.session.execute(sql, {"tableWaiter":tableWaiter})
+            result = db.session.execute(sql, {"tableWaiter": tableWaiter})
             waiter = result.fetchone()
 
             if waiter is None:
@@ -305,7 +321,7 @@ def editTable(id):
 
             # Check table user
             sql = "SELECT id FROM users WHERE id = :tableUser AND userType = 'table'"
-            result = db.session.execute(sql, {"tableUser":tableUser})
+            result = db.session.execute(sql, {"tableUser": tableUser})
             tUser = result.fetchone()
 
             if tUser is None:
@@ -313,7 +329,7 @@ def editTable(id):
 
             # Check that the table user is free or reserved for this table
             sql = "SELECT id FROM tables WHERE id = :tableUser"
-            result = db.session.execute(sql, {"tableUser":tableUser})
+            result = db.session.execute(sql, {"tableUser": tableUser})
             tables = result.fetchall()
 
             if len(tables) > 0 and tables[0][0] != id:
@@ -321,7 +337,8 @@ def editTable(id):
 
             # Update table
             sql = "UPDATE tables SET tableName=:tableName, waiterId=:tableWaiter, userId=:tableUser WHERE id = :id"
-            db.session.execute(sql, {"tableName":tableName,"tableWaiter":tableWaiter, "tableUser":tableUser, "id":id})
+            db.session.execute(sql, {
+                               "tableName": tableName, "tableWaiter": tableWaiter, "tableUser": tableUser, "id": id})
             db.session.commit()
 
             return redirect("/tables/"+id)
@@ -330,20 +347,21 @@ def editTable(id):
 
     # Get table
     sql = "SELECT t.id, t.tableName, u.id, t.userId FROM tables t LEFT JOIN users u ON t.waiterId = u.id WHERE t.id=:id"
-    result = db.session.execute(sql, {"id":id})
+    result = db.session.execute(sql, {"id": id})
     table = result.fetchone()
 
     # Get waiters
     sql = "SELECT id, username FROM users WHERE userType = 'waiter'"
     result = db.session.execute(sql)
-    waiters = result.fetchall() 
+    waiters = result.fetchall()
 
     # Get free table users and the table user reserved for this table
     sql = "SELECT id, username FROM users WHERE userType = 'table' AND id NOT IN (SELECT userId FROM tables WHERE id != :id)"
-    result = db.session.execute(sql, {"id":id})
-    tableUsers = result.fetchall() 
+    result = db.session.execute(sql, {"id": id})
+    tableUsers = result.fetchall()
 
     return render_template("editTable.html", table=table, waiters=waiters, tableUsers=tableUsers)
+
 
 @app.route("/order", methods=["GET", "POST"])
 def orders():
@@ -355,16 +373,17 @@ def orders():
         tableId = request.form["tableId"]
 
         # Check that the current user is the user for this table
-        sql = "SELECT id FROM tables WHERE userId = :userId"
-        result = db.session.execute(sql, {"userId":session.get("userId")})
+        sql = "SELECT id, wantsToPay FROM tables WHERE userId = :userId"
+        result = db.session.execute(sql, {"userId": session.get("userId")})
         tableIdForUser = result.fetchone()[0]
 
-        if int(tableIdForUser) != int(tableId):
+        # If wrong user or table wants to pay, don't allow ordering anymore
+        if int(tableIdForUser) != int(tableId) or table[1] == False:
             return redirect("/")
 
         try:
             sql = "INSERT INTO orders (tableId, orderStatus, created_at) VALUES (:tableId, 'new', NOW()) RETURNING id"
-            result = db.session.execute(sql, {"tableId":tableId})
+            result = db.session.execute(sql, {"tableId": tableId})
             orderId = result.fetchone()[0]
 
             menuItemIds = request.form.getlist("menuItemId")
@@ -372,7 +391,8 @@ def orders():
             for i, menuItemId in enumerate(menuItemIds):
                 if menuItemQuantities[i] != "":
                     sql = "INSERT INTO orderItems (orderId, menuItemId, quantity) VALUES (:orderId, :menuItemId, :quantity)"
-                    db.session.execute(sql, {"orderId":orderId, "menuItemId":menuItemId, "quantity":menuItemQuantities[i]})
+                    db.session.execute(sql, {
+                                       "orderId": orderId, "menuItemId": menuItemId, "quantity": menuItemQuantities[i]})
             db.session.commit()
             return redirect("/table")
         except:
@@ -386,13 +406,14 @@ def orders():
     # Get menu items
     sql = "SELECT id, itemName, itemPrice, itemDescription, itemCategory FROM menuItems"
     result = db.session.execute(sql)
-    menuItems = result.fetchall() 
+    menuItems = result.fetchall()
 
     # Get table id
     sql = "SELECT id FROM tables WHERE userId = :userId"
     result = db.session.execute(sql, {"userId": session.get("userId")})
     tableId = result.fetchone()[0]
     return render_template("order.html", menuItems=menuItems, tableId=tableId, menuItemCategories=menuItemCategories)
+
 
 @app.route("/proceedorder/<id>", methods=["GET"])
 def proceedOrder(id):
@@ -402,7 +423,7 @@ def proceedOrder(id):
 
     # Get order
     sql = "SELECT id, orderStatus FROM orders WHERE id=:id"
-    result = db.session.execute(sql,{"id":id})
+    result = db.session.execute(sql, {"id": id})
     order = result.fetchone()
 
     if order is None:
@@ -414,19 +435,20 @@ def proceedOrder(id):
 
     if newStatus != currentStatus:
         try:
-            sql = "UPDATE orders SET orderStatus=:orderStatus WHERE id = :id"
-            db.session.execute(sql, {"orderStatus":newStatus,"id":id})
+            sql = "UPDATE orders SET orderStatus=:orderStatus, updated_at=NOW() WHERE id = :id"
+            db.session.execute(sql, {"orderStatus": newStatus, "id": id})
             db.session.commit()
         except:
             pass
-    
+
     return redirect("/")
+
 
 @app.route("/cancelorder/<id>", methods=["GET"])
 def cancelOrder(id):
     # Get order
     sql = "SELECT t.userId, o.orderStatus FROM orders o LEFT JOIN tables t ON o.tableId = t.id WHERE o.id = :id"
-    result = db.session.execute(sql, {"id":id})
+    result = db.session.execute(sql, {"id": id})
     order = result.fetchone()
 
     if order is None:
@@ -442,12 +464,12 @@ def cancelOrder(id):
     # Only orders with status "new" can be cancelled
     if order[1] == "new":
         try:
-            sql = "UPDATE orders SET orderStatus='cancelled' WHERE id = :id"
-            db.session.execute(sql, {"id":id})
+            sql = "UPDATE orders SET orderStatus='cancelled', cancelled_at=NOW() WHERE id = :id"
+            db.session.execute(sql, {"id": id})
             db.session.commit()
         except:
             pass
-    
+
     return redirect("/")
 
 
@@ -458,38 +480,37 @@ def table():
         return redirect("/")
 
     # Get table and waiter information for user
-    sql = "SELECT t.id, t.tableName, u.username FROM tables t LEFT JOIN users u ON t.waiterId = u.id WHERE t.userId=:id"
-    result = db.session.execute(sql, {"id":session.get("userId")})
+    sql = "SELECT t.id, t.tableName, u.username, t.wantsToPay FROM tables t LEFT JOIN users u ON t.waiterId = u.id WHERE t.userId=:id"
+    result = db.session.execute(sql, {"id": session.get("userId")})
     table = result.fetchone()
 
     if table is None:
         return redirect("/notable")
 
-    # Get waiter name    
+    # Get waiter name
     waiterName = table[2]
 
     # Get orders for table
     sql = "SELECT id, orderStatus, created_at FROM orders WHERE tableId = :tableId AND orderStatus != 'paid' AND orderStatus != 'cancelled' ORDER BY id"
-    result = db.session.execute(sql, {"tableId":table[0]})
+    result = db.session.execute(sql, {"tableId": table[0]})
     orders = result.fetchall()
 
     # Get order items for table
-    sql = "SELECT o.orderId, o.quantity, m.itemName, m.itemPrice, m.itemDescription FROM menuItems m LEFT JOIN orderItems o ON o.menuItemId = m.id LEFT JOIN orders os ON o.orderId = os.id WHERE os.tableId = :tableId AND os.orderStatus != 'cancelled'"
-    result = db.session.execute(sql, {"tableId":table[0]})
+    sql = "SELECT o.orderId, o.quantity, m.itemName, m.itemPrice, m.itemDescription FROM menuItems m LEFT JOIN orderItems o ON o.menuItemId = m.id LEFT JOIN orders os ON o.orderId = os.id WHERE os.tableId = :tableId AND os.orderStatus != 'cancelled' AND os.orderStatus != 'paid'"
+    result = db.session.execute(sql, {"tableId": table[0]})
     orderItems = result.fetchall()
 
-    # Calculate order totals
-    sql = "SELECT o.orderId, SUM(o.quantity * m.itemPrice) FROM orderItems o LEFT JOIN menuItems m ON m.id = o.menuItemId LEFT JOIN orders os ON o.orderId = os.id WHERE os.tableId = :tableId AND os.orderStatus != 'cancelled' GROUP BY o.orderId ORDER BY o.orderId"
-    result = db.session.execute(sql, {"tableId":table[0]})
-    orderTotals = result.fetchall()
-
-
-    # Calculate grand total
+    # Calculate order totals and grand total
     grandTotal = 0
+    orderTotals = {}
     for orderItem in orderItems:
-        grandTotal += orderItem[1] * orderItem[3]
+        itemTotal = orderItem[1] * orderItem[3]
+        if orderItem[0] not in orderTotals:
+            orderTotals[orderItem[0]] = 0
+        orderTotals[orderItem[0]] += itemTotal
+        grandTotal += itemTotal
 
-    return render_template("table.html", table=table, waiterName=waiterName, orders=orders, orderItems=orderItems, orderTotals=orderTotals, grandTotal=grandTotal)
+    return render_template("table.html", table=table, waiterName=waiterName, orders=orders, orderItems=orderItems, grandTotal=grandTotal, orderTotals=orderTotals)
 
 
 @app.route("/waiter", methods=["GET"])
@@ -498,43 +519,83 @@ def waiter():
     if session.get("userType") != "waiter":
         return redirect("/")
 
-    # Get table and waiter information for user
-    sql = "SELECT t.id, t.tableName, u.username FROM tables t LEFT JOIN users u ON t.waiterId = u.id WHERE t.userId=:id"
-    result = db.session.execute(sql, {"id":session.get("userId")})
-    table = result.fetchone()
+    # Get tables for waiter
+    sql = "SELECT id, tableName, wantsToPay FROM tables WHERE waiterId = :id"
+    result = db.session.execute(sql, {"id": session.get("userId")})
+    tables = result.fetchall()
 
-    if table is None:
-        return redirect("/notable")
-
-    # Get waiter name    
-    waiterName = table[2]
-
-    # Get orders for table
-    sql = "SELECT id, orderStatus, created_at FROM orders WHERE tableId = :tableId AND orderStatus != 'paid' ORDER BY id"
-    result = db.session.execute(sql, {"tableId":table[0]})
+    # Get orders for waiter
+    sql = "SELECT o.id, o.created_at, o.orderStatus, o.tableId, t.tableName, o.updated_at FROM orders o LEFT JOIN tables t ON o.tableId = t.id WHERE t.waiterId = :id AND o.orderStatus != 'paid' AND o.orderStatus != 'cancelled' ORDER BY created_at asc"
+    result = db.session.execute(sql, {"id": session.get("userId")})
     orders = result.fetchall()
 
-    # Get order items for table
-    sql = "SELECT o.orderId, o.quantity, m.itemName, m.itemPrice, m.itemDescription FROM menuItems m LEFT JOIN orderItems o ON o.menuItemId = m.id LEFT JOIN orders os ON o.orderId = os.id WHERE os.tableId = :tableId"
-    result = db.session.execute(sql, {"tableId":table[0]})
+    # Get items for orders
+    sql = "SELECT oi.orderId, oi.quantity, m.itemName, m.itemPrice FROM menuItems m LEFT JOIN orderItems oi ON m.id = oi.menuItemId LEFT JOIN orders o ON oi.orderId = o.id LEFT JOIN tables t ON o.tableId = t.id WHERE t.waiterId = :id AND o.orderStatus != 'paid' AND o.orderStatus != 'cancelled'"
+    result = db.session.execute(sql, {"id": session.get("userId")})
     orderItems = result.fetchall()
 
     # Calculate order totals
-    sql = "SELECT o.orderId, SUM(o.quantity * m.itemPrice) FROM orderItems o LEFT JOIN menuItems m ON m.id = o.menuItemId LEFT JOIN orders os ON o.orderId = os.id WHERE os.tableId = :tableId GROUP BY o.orderId ORDER BY o.orderId"
-    result = db.session.execute(sql, {"tableId":table[0]})
-    orderTotals = result.fetchall()
-
-
-    # Calculate grand total
-    grandTotal = 0
+    orderTotals = {}
     for orderItem in orderItems:
-        grandTotal += orderItem[1] * orderItem[3]
+        itemTotal = orderItem[1] * orderItem[3]
+        if orderItem[0] not in orderTotals:
+            orderTotals[orderItem[0]] = 0
+        orderTotals[orderItem[0]] += itemTotal
 
-    return render_template("table.html", table=table, waiterName=waiterName, orders=orders, orderItems=orderItems, orderTotals=orderTotals, grandTotal=grandTotal)
+    return render_template("waiter.html", tables=tables, orders=orders, orderItems=orderItems, orderTotals=orderTotals)
+
+@app.route("/wantstopay/<id>", methods=["GET"])
+def wantstopay(id):
+    # Table-only route
+    if session.get("userType") != "table":
+        return redirect("/")
+    
+    # Check that user owns the table
+    sql = "SELECT userId FROM tables WHERE id = :id"
+    result = db.session.execute(sql, {"id": id})
+    table = result.fetchone()
+
+    if table is None or (int(table[0]) != int(session.get("userId"))):
+        return redirect("/")
+
+    try:
+        # Cancel all orders with status 'new'
+        sql = "UPDATE orders SET orderStatus = 'cancelled' WHERE tableId = :id AND orderStatus = 'new'"
+        db.session.execute(sql, {"id": id})
+
+        # Set wantsToPay
+        sql = "UPDATE tables SET wantsToPay = TRUE WHERE id = :id"
+        db.session.execute(sql, {"id": id})
+        db.session.commit()
+    except:
+        pass
+
+    return redirect("/table")
+
+@app.route("/haspaid/<id>", methods=["GET"])
+def haspaid(id):
+    # Waiter and admin only
+    if session.get("userType") == "table":
+        return redirect("/")
+
+    try:
+        # Mark all orders with status 'completed' as 'paid'
+        sql = "UPDATE orders SET orderStatus = 'paid' WHERE tableId = :id AND orderStatus != 'cancelled' AND orderStatus != 'new'"
+        db.session.execute(sql, {"id": id})
+
+        # Set wantsToPay
+        sql = "UPDATE tables SET wantsToPay = FALSE WHERE id = :id"
+        db.session.execute(sql, {"id": id})
+        db.session.commit()
+    except:
+        pass
+
+    return redirect("/table")
 
 @app.route("/notable", methods=["GET"])
 def notable():
     return render_template("notable.html")
+
 
 def getNewStatus(oldStatus):
     if(oldStatus == "new"):

@@ -30,6 +30,7 @@ CREATE TABLE users (
 CREATE TABLE tables (
     id SERIAL PRIMARY KEY,
     tableName TEXT UNIQUE NOT NULL,
+    wantsToPay BOOLEAN,
     waiterId INTEGER REFERENCES users,
     userId INTEGER UNIQUE REFERENCES users
 );
@@ -46,7 +47,9 @@ CREATE TABLE orders (
     id SERIAL PRIMARY KEY,
     tableId INTEGER NOT NULL REFERENCES tables,
     orderStatus orderStatus NOT NULL,
-    created_at TIMESTAMP NOT NULL
+    created_at TIMESTAMP NOT NULL,
+    cancelled_at TIMESTAMP,
+    updated_at TIMESTAMP
 );
 
 CREATE TABLE orderItems (

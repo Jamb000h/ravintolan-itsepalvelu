@@ -6,8 +6,9 @@
 Hello! Your waiter today is <span class="waiter">{{ waiterName }}</span>.
 
 <h2>Orders</h2>
-
-<a href="/order">Make a new order</a>
+{% if table[3] == False %}
+    <a href="/order">Make a new order</a>
+{% endif %}
 
 <ul>
     {% for order in orders %}
@@ -24,9 +25,18 @@ Hello! Your waiter today is <span class="waiter">{{ waiterName }}</span>.
                 {% endfor %}
             </ul>
         </div>
-        Order total: <span class="total">{{ orderTotals[loop.index0][1] | round(2) }} €</span>
+        Order total: <span class="total">{{ orderTotals[order[0]] | round(2) }} €</span>
     </li>
     {% endfor %}
 </ul>
 <p class="grand-total">Grand total: {{ grandTotal }} €</p>
+
+{% if table[3] == False %}
+    <a href="wantstopay/{{ table[0] }}">Ask for the bill</a>
+{% endif %}
+
+{% if table[3] == True %}
+    <p>You have asked for the bill. Please wait for your waiter.</p>
+{% endif %}
+
 {% endblock %}
