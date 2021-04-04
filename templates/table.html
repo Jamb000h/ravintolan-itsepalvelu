@@ -12,7 +12,9 @@ Hello! Your waiter today is <span class="waiter">{{ waiterName }}</span>.
 <ul>
     {% for order in orders %}
     <li>Order #{{ loop.index }}, Status: <span class="{{order[1]}}">{{order[1]}}</span>
-        <a href="/cancelOrder/{{ order[0] }}">Cancel order</a>
+        {% if order[1] == 'new' %}
+        <a href="/cancelorder/{{ order[0] }}">Cancel order</a>
+        {% endif %}
         <div class="collapse">
             <ul>
                 {% for orderItem in orderItems %}

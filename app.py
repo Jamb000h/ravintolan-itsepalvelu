@@ -113,6 +113,7 @@ def editUser(id):
 
     if request.method == "POST":
         username = request.form["username"]
+        password = request.form["password"]
 
         # Check that the username is not reserved and inform user if reserved
         sql = "SELECT id FROM users WHERE username=:username"
@@ -123,8 +124,9 @@ def editUser(id):
             return redirect("/users/"+id+"?duplicateNameError")
 
         try:
-            sql = "UPDATE users SET username=:username WHERE id = :id"
-            db.session.execute(sql, {"username": username,"id":id})
+            hash_value = generate_password_hash(password)
+            sql = "UPDATE users SET username=:username, password=:password WHERE id = :id"
+            db.session.execute(sql, {"username": username, "password": hash_value, "id":id})
             db.session.commit()
             return redirect("/users/"+id)
         except:
@@ -392,7 +394,7 @@ def orders():
     tableId = result.fetchone()[0]
     return render_template("order.html", menuItems=menuItems, tableId=tableId, menuItemCategories=menuItemCategories)
 
-@app.route("/proceedOrder/<id>", methods=["GET"])
+@app.route("/proceedorder/<id>", methods=["GET"])
 def proceedOrder(id):
     # Route only for waiter and admin
     if session.get("userType") == "table":
@@ -420,10 +422,10 @@ def proceedOrder(id):
     
     return redirect("/")
 
-@app.route("/cancelOrder/<id>", methods=["GET"])
+@app.route("/cancelorder/<id>", methods=["GET"])
 def cancelOrder(id):
     # Get order
-    sql = "SELECT o.id, o.tableId, u.id, t.userId, o.orderStatus FROM orders o LEFT JOIN tables t ON o.tableId = t.id AND o.id = :id"
+    sql = "SELECT t.userId, o.orderStatus FROM orders o LEFT JOIN tables t ON o.tableId = t.id WHERE o.id = :id"
     result = db.session.execute(sql, {"id":id})
     order = result.fetchone()
 
@@ -432,13 +434,13 @@ def cancelOrder(id):
 
     if session.get("userType") == "table":
         # Check that the user is correct
-        tableUserId = order[3]
+        tableUserId = order[0]
 
         if int(tableUserId) != int(session.get("userId")):
             return redirect("/")
 
     # Only orders with status "new" can be cancelled
-    if order[4] == "new":
+    if order[1] == "new":
         try:
             sql = "UPDATE orders SET orderStatus='cancelled' WHERE id = :id"
             db.session.execute(sql, {"id":id})
@@ -446,7 +448,7 @@ def cancelOrder(id):
         except:
             pass
     
-    return redirect("/order/"+id)
+    return redirect("/")
 
 
 @app.route("/table", methods=["GET"])
@@ -467,17 +469,17 @@ def table():
     waiterName = table[2]
 
     # Get orders for table
-    sql = "SELECT id, orderStatus, created_at FROM orders WHERE tableId = :tableId AND orderStatus != 'paid' ORDER BY id"
+    sql = "SELECT id, orderStatus, created_at FROM orders WHERE tableId = :tableId AND orderStatus != 'paid' AND orderStatus != 'cancelled' ORDER BY id"
     result = db.session.execute(sql, {"tableId":table[0]})
     orders = result.fetchall()
 
     # Get order items for table
-    sql = "SELECT o.orderId, o.quantity, m.itemName, m.itemPrice, m.itemDescription FROM menuItems m LEFT JOIN orderItems o ON o.menuItemId = m.id LEFT JOIN orders os ON o.orderId = os.id WHERE os.tableId = :tableId"
+    sql = "SELECT o.orderId, o.quantity, m.itemName, m.itemPrice, m.itemDescription FROM menuItems m LEFT JOIN orderItems o ON o.menuItemId = m.id LEFT JOIN orders os ON o.orderId = os.id WHERE os.tableId = :tableId AND os.orderStatus != 'cancelled'"
     result = db.session.execute(sql, {"tableId":table[0]})
     orderItems = result.fetchall()
 
     # Calculate order totals
-    sql = "SELECT o.orderId, SUM(o.quantity * m.itemPrice) FROM orderItems o LEFT JOIN menuItems m ON m.id = o.menuItemId LEFT JOIN orders os ON o.orderId = os.id WHERE os.tableId = :tableId GROUP BY o.orderId ORDER BY o.orderId"
+    sql = "SELECT o.orderId, SUM(o.quantity * m.itemPrice) FROM orderItems o LEFT JOIN menuItems m ON m.id = o.menuItemId LEFT JOIN orders os ON o.orderId = os.id WHERE os.tableId = :tableId AND os.orderStatus != 'cancelled' GROUP BY o.orderId ORDER BY o.orderId"
     result = db.session.execute(sql, {"tableId":table[0]})
     orderTotals = result.fetchall()
 
