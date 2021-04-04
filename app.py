@@ -2,7 +2,7 @@ from flask import Flask
 from flask import redirect, render_template, request, session
 from flask_sqlalchemy import SQLAlchemy
 from werkzeug.security import check_password_hash, generate_password_hash
-from os import getenv
+from os import getenv, urandom
 import sys
 
 app = Flask(__name__)
@@ -24,6 +24,7 @@ if user is None:
     db.session.commit()
 
 # Routes
+
 
 @app.route("/")
 def index():
@@ -52,6 +53,7 @@ def login():
             session["username"] = username
             session["userId"] = user[0]
             session["userType"] = user[1]
+            session["csrfToken"] = urandom(16).hex()
     return redirect("/")
 
 
@@ -63,6 +65,8 @@ def logout():
         del session["userType"]
     if session.get("userId") is not None:
         del session["userId"]
+    if session.get("csrfToken") is not None:
+        del session["csrfToken"]
     return redirect("/")
 
 
@@ -74,6 +78,9 @@ def users():
 
     if request.method == "POST":
         try:
+            if session["csrfToken"] != request.form["csrfToken"]:
+                abort(403)
+
             username = request.form["username"]
             password = request.form["password"]
             userType = request.form["userType"]
@@ -120,6 +127,8 @@ def editUser(id):
         return redirect("/")
 
     if request.method == "POST":
+        if session["csrfToken"] != request.form["csrfToken"]:
+            abort(403)
         username = request.form["username"]
         password = request.form["password"]
 
@@ -157,6 +166,8 @@ def menu():
 
     if request.method == "POST":
         try:
+            if session["csrfToken"] != request.form["csrfToken"]:
+                abort(403)
             itemName = request.form["itemName"]
             itemPrice = request.form["itemPrice"]
             itemCategory = request.form["itemCategory"]
@@ -192,6 +203,8 @@ def editMenuItem(id):
 
     if request.method == "POST":
         try:
+            if session["csrfToken"] != request.form["csrfToken"]:
+                abort(403)
             itemName = request.form["itemName"]
             itemPrice = request.form["itemPrice"]
             itemCategory = request.form["itemCategory"]
@@ -207,7 +220,7 @@ def editMenuItem(id):
 
             sql = "UPDATE menuItems SET itemName=:itemName, itemPrice=:itemPrice, itemCategory=:itemCategory, itemDescription=:itemDescription WHERE id = :id"
             db.session.execute(sql, {"itemName": itemName, "itemPrice": itemPrice,
-                               "itemCategory": itemCategory, "itemDescription": itemDescription, "id": id})
+                            "itemCategory": itemCategory, "itemDescription": itemDescription, "id": id})
             db.session.commit()
             return redirect("/menu/"+id)
         except:
@@ -229,6 +242,8 @@ def tables():
 
     if request.method == "POST":
         try:
+            if session["csrfToken"] != request.form["csrfToken"]:
+                abort(403)
             tableName = request.form["tableName"]
             tableWaiter = request.form["tableWaiter"]
             tableUser = request.form["tableUser"]
@@ -265,7 +280,7 @@ def tables():
             if len(tables) > 0 and tables[0][0] is not id:
                 return redirect("/tables?reservedUserError")
 
-            sql = "INSERT INTO tables (tableName,waiterId,userId) VALUES (:tableName,:tableWaiter,:tableUser)"
+            sql = "INSERT INTO tables (tableName,waiterId,userId, wantsToPay) VALUES (:tableName,:tableWaiter,:tableUser, FALSE)"
             db.session.execute(
                 sql, {"tableName": tableName, "tableWaiter": tableWaiter, "tableUser": tableUser})
             db.session.commit()
@@ -299,6 +314,8 @@ def editTable(id):
 
     if request.method == "POST":
         try:
+            if session["csrfToken"] != request.form["csrfToken"]:
+                abort(403)
             tableName = request.form["tableName"]
             tableWaiter = request.form["tableWaiter"]
             tableUser = request.form["tableUser"]
@@ -370,15 +387,17 @@ def orders():
         return redirect("/")
 
     if request.method == "POST":
+        if session["csrfToken"] != request.form["csrfToken"]:
+            abort(403)
         tableId = request.form["tableId"]
 
         # Check that the current user is the user for this table
         sql = "SELECT id, wantsToPay FROM tables WHERE userId = :userId"
         result = db.session.execute(sql, {"userId": session.get("userId")})
-        tableIdForUser = result.fetchone()[0]
+        table = result.fetchone()
 
         # If wrong user or table wants to pay, don't allow ordering anymore
-        if int(tableIdForUser) != int(tableId) or table[1] == False:
+        if int(table[0]) != int(tableId) or table[1] == False:
             return redirect("/")
 
         try:
@@ -544,12 +563,13 @@ def waiter():
 
     return render_template("waiter.html", tables=tables, orders=orders, orderItems=orderItems, orderTotals=orderTotals)
 
+
 @app.route("/wantstopay/<id>", methods=["GET"])
 def wantstopay(id):
     # Table-only route
     if session.get("userType") != "table":
         return redirect("/")
-    
+
     # Check that user owns the table
     sql = "SELECT userId FROM tables WHERE id = :id"
     result = db.session.execute(sql, {"id": id})
@@ -572,6 +592,7 @@ def wantstopay(id):
 
     return redirect("/table")
 
+
 @app.route("/haspaid/<id>", methods=["GET"])
 def haspaid(id):
     # Waiter and admin only
@@ -591,6 +612,7 @@ def haspaid(id):
         pass
 
     return redirect("/table")
+
 
 @app.route("/notable", methods=["GET"])
 def notable():

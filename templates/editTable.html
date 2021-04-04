@@ -26,6 +26,7 @@
         </select>
     </label>
     <br />
+    <input type="hidden" name="csrfToken" value="{{ session.csrfToken }}">
     <input type="submit" value="Save">
 </form>
 {% endblock %}

@@ -28,6 +28,7 @@
         <textarea name="itemDescription" required>{{ menuItem[4] }}</textarea>
     </label>
     <br />
+    <input type="hidden" name="csrfToken" value="{{ session.csrfToken }}">
     <input type="submit" value="Save">
 </form>
 {% endblock %}
