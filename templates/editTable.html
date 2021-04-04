@@ -1,4 +1,5 @@
 {% extends "layout.html" %}
+{% block title %}Edit {{ table[1] }}{% endblock %}
 {% block content %}
 <h1>Edit {{ table[1] }}</h1>
 <form action="/tables/{{ table[0] }}" method="POST">

@@ -400,7 +400,7 @@ def proceedOrder(id):
 
     # Get order
     sql = "SELECT id, orderStatus FROM orders WHERE id=:id"
-    result = db.session.execute(sql, "id":id})
+    result = db.session.execute(sql,{"id":id})
     order = result.fetchone()
 
     if order is None:
@@ -491,7 +491,7 @@ def table():
 
 
 @app.route("/waiter", methods=["GET"])
-def table():
+def waiter():
     # Waiter-only route
     if session.get("userType") != "waiter":
         return redirect("/")
