@@ -280,7 +280,7 @@ def tables():
             if len(tables) > 0 and tables[0][0] is not id:
                 return redirect("/tables?reservedUserError")
 
-            sql = "INSERT INTO tables (tableName,waiterId,userId, wantsToPay) VALUES (:tableName,:tableWaiter,:tableUser, FALSE)"
+            sql = "INSERT INTO tables (tableName,waiterId,userId,wantsToPay) VALUES (:tableName,:tableWaiter,:tableUser, FALSE)"
             db.session.execute(
                 sql, {"tableName": tableName, "tableWaiter": tableWaiter, "tableUser": tableUser})
             db.session.commit()
@@ -397,7 +397,7 @@ def orders():
         table = result.fetchone()
 
         # If wrong user or table wants to pay, don't allow ordering anymore
-        if int(table[0]) != int(tableId) or table[1] == False:
+        if int(table[0]) != int(tableId) or table[1] == True:
             return redirect("/")
 
         try:
@@ -471,14 +471,14 @@ def cancelOrder(id):
     order = result.fetchone()
 
     if order is None:
-        return redirect("/")
+        return redirect("/?asd")
 
     if session.get("userType") == "table":
         # Check that the user is correct
         tableUserId = order[0]
 
         if int(tableUserId) != int(session.get("userId")):
-            return redirect("/")
+            return redirect("/?bsd")
 
     # Only orders with status "new" can be cancelled
     if order[1] == "new":
@@ -489,7 +489,7 @@ def cancelOrder(id):
         except:
             pass
 
-    return redirect("/")
+    return redirect("/?csd")
 
 
 @app.route("/table", methods=["GET"])
