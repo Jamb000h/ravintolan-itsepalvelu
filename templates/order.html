@@ -11,7 +11,7 @@
             <label for="menuItem{{ menuItem[0] }}">
                 {{ menuItem[1] }} á {{ menuItem[2] | round(2) }} €<br />
                 {{ menuItem[3] }} <br />
-                <input name="menuItemQty" id="menuItem{{ menuItem[0] }}" type="number"/>
+                <input name="menuItemQty" id="menuItem{{ menuItem[0] }}" min="1" step="1" type="number"/>
             </label><br /><br />
         {% endfor %}
     {% endfor %}

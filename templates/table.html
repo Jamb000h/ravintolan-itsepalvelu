@@ -12,7 +12,7 @@
 
 <p class="grand-total">Grand total: {{ grandTotal }} €</p>
 
-{% if table[3] != True %}
+{% if table[3] != True and hasOrdersToPay == True %}
 <a href="wantstopay/{{ table[0] }}">Ask for the bill</a>
 {% endif %}
 
