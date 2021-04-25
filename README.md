@@ -41,15 +41,11 @@ You can see your own table and your assigned waiter. You can make an order and s
 ### Users 
 For convenience, a list of default users have been created. Password is identical to username.
 
-- admin
-- waiter
-- table
+- admin1
+- waiter1
+- table1
 
 ## TODO:
-- Deletion of things (maybe?)
 - Menu items visible per section for admin (done for ordering already)
 - Better styles
-- Better UI level form validation
-- Better BE form validation
-- Application structure (everything is dumped in a single app.py at the moment)
-- Stretch goal: statistics view for admin?
+- Deletion of things (maybe?)
