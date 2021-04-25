@@ -110,7 +110,7 @@ def listMenu():
 
         return redirect("/menu")
 
-    return render_template("menu.html", menuItems=menu.getMenu())
+    return render_template("menu.html", menuItems=menu.getMenu(), menuItemCategories=menu.getMenuItemCategories())
 
 
 @app.route("/menu/<id>", methods=["GET", "POST"])

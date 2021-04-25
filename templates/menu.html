@@ -3,11 +3,14 @@
 {% block content %}
 <h1>Menu</h1>
 
-<ul>
-    {% for menuItem in menuItems %}
-        <li>{{ menuItem[1] }} <a href="/menu/{{ menuItem[0] }}">Edit</a></li>
-    {% endfor %}
-</ul>
+{% for menuItemCategory in menuItemCategories %}
+    <h2>{{menuItemCategory[0]|title}}s</h2>
+    <ul>
+        {% for menuItem in menuItems if menuItem[4] == menuItemCategory[0]%}
+            <li>{{ menuItem[1] }} <a href="/menu/{{ menuItem[0] }}">Edit</a></li>
+        {% endfor %}
+    </ul>
+{% endfor %}
 
 <h2>Add new menu item</h2>
 <form action="/menu" method="POST">
