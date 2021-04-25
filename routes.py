@@ -158,7 +158,7 @@ def listTables():
         tableWaiter = request.form["tableWaiter"]
         tableUser = request.form["tableUser"]
 
-        if len(tableName) < 6
+        if len(tableName) < 6:
             return redirect("/tables")
 
         tables.addTable(tableName, tableWaiter, tableUser)
@@ -183,7 +183,7 @@ def editTable(id):
         tableWaiter = request.form["tableWaiter"]
         tableUser = request.form["tableUser"]
 
-        if len(tableName) < 6
+        if len(tableName) < 6:
             return redirect("/tables"+id)
 
         tables.editTable(id, tableName, tableWaiter, tableUser)
