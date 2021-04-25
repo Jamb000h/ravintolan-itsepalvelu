@@ -13,7 +13,11 @@
 <p class="grand-total">Grand total: {{ grandTotal }} €</p>
 
 {% if table[3] != True and hasOrdersToPay == True %}
-<a href="wantstopay/{{ table[0] }}">Ask for the bill</a>
+<form action="/wantstopay" method="POST">
+    <input type="hidden" name="csrfToken" value="{{ session.csrfToken }}">
+    <input name="tableId" type="hidden" value="{{ table[0] }}" />
+    <input type="submit" value="Ask for the bill" />
+</form>
 {% endif %}
 
 {% if table[3] == True %}
@@ -37,7 +41,11 @@
             </div>
             <div class="order-actions">
                 {% if order[1] == 'new' %}
-                <button><a href="/cancelorder/{{ order[0] }}">Cancel order</a></button>
+                <form action="/cancelorder" method="POST">
+                    <input type="hidden" name="csrfToken" value="{{ session.csrfToken }}">
+                    <input name="orderId" type="hidden" value="{{ order[0] }}" />
+                    <input type="submit" value="Cancel order" />
+                </form>
                 {% endif %}
             </div>
         </div>

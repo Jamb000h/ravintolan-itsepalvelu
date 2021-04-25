@@ -49,6 +49,9 @@ def listUsers():
         password = request.form["password"]
         userType = request.form["userType"]
 
+        if not users.validCredentials(username, password):
+            return redirect("/users")
+
         users.register(username, password, userType)
         return redirect("/users")
 
@@ -70,6 +73,9 @@ def editUser(id):
 
         username = request.form["username"]
         password = request.form["password"]
+
+        if not users.validCredentials(username, password):
+            return redirect("/users")
 
         users.editUser(id, username, password)
         return redirect("/users/"+id)
@@ -97,6 +103,9 @@ def listMenu():
         itemCategory = request.form["itemCategory"]
         itemDescription = request.form["itemDescription"]
 
+        if not menu.validItem(itemName, itemPrice, itemDescription):
+            return redirect("/menu")
+
         menu.addMenuItem(itemName, itemPrice, itemCategory, itemDescription)
 
         return redirect("/menu")
@@ -118,6 +127,9 @@ def editMenuItem(id):
         itemPrice = request.form["itemPrice"]
         itemCategory = request.form["itemCategory"]
         itemDescription = request.form["itemDescription"]
+
+        if not menu.validItem(itemName, itemPrice, itemDescription):
+            return redirect("/menu")
 
         menu.editMenuItem(id, itemName, itemPrice,
                           itemCategory, itemDescription)
@@ -146,6 +158,9 @@ def listTables():
         tableWaiter = request.form["tableWaiter"]
         tableUser = request.form["tableUser"]
 
+        if len(tableName) < 6
+            return redirect("/tables")
+
         tables.addTable(tableName, tableWaiter, tableUser)
 
     return render_template("tables.html",
@@ -167,6 +182,9 @@ def editTable(id):
         tableName = request.form["tableName"]
         tableWaiter = request.form["tableWaiter"]
         tableUser = request.form["tableUser"]
+
+        if len(tableName) < 6
+            return redirect("/tables"+id)
 
         tables.editTable(id, tableName, tableWaiter, tableUser)
 
@@ -201,13 +219,17 @@ def listOrders():
                            menuItemCategories=menu.getMenuItemCategories())
 
 
-@app.route("/proceedorder/<id>", methods=["GET"])
-def proceedOrder(id):
+@app.route("/proceedorder", methods=["POST"])
+def proceedOrder():
     # Route only for waiter and admin
     if session.get("userType") == "table":
         return redirect("/")
 
-    order = orders.getOrderById(id)
+    if session["csrfToken"] != request.form["csrfToken"]:
+        abort(403)
+
+    orderId = request.form["orderId"]
+    order = orders.getOrderById(orderId)
 
     if not order:
         return redirect("/")
@@ -216,15 +238,19 @@ def proceedOrder(id):
     newStatus = orders.getNewStatus(currentStatus)
 
     if newStatus != currentStatus:
-        orders.updateOrderStatus(id, newStatus)
+        orders.updateOrderStatus(orderId, newStatus)
 
     return redirect("/")
 
 
-@app.route("/cancelorder/<id>", methods=["GET"])
-def cancelOrder(id):
+@app.route("/cancelorder", methods=["POST"])
+def cancelOrder():
+    if session["csrfToken"] != request.form["csrfToken"]:
+        abort(403)
+
+    orderId = request.form["orderId"]
     # Get order
-    order = orders.getTableIdAndStatusForOrder(id)
+    order = orders.getTableIdAndStatusForOrder(orderId)
 
     if not order:
         return redirect("/")
@@ -238,7 +264,7 @@ def cancelOrder(id):
 
     # Only orders with status "new" can be cancelled
     if order[1] == "new":
-        orders.updateOrderStatus(id, "cancelled")
+        orders.updateOrderStatus(orderId, "cancelled")
 
     return redirect("/")
 
@@ -286,11 +312,16 @@ def waiter():
                            orderItems=orderItems,
                            orderTotals=orderTotals)
 
-@app.route("/wantstopay/<id>", methods=["GET"])
-def wantstopay(id):
+@app.route("/wantstopay", methods=["POST"])
+def wantstopay():
     # Table-only route
     if session.get("userType") != "table":
         return redirect("/")
+
+    if session["csrfToken"] != request.form["csrfToken"]:
+        abort(403)
+
+    id = request.form["tableId"]
 
     # Check that user owns the table
     tableId = tables.getTableIdForUser()
@@ -304,13 +335,18 @@ def wantstopay(id):
     orders.cancelNewOrdersForTable(id)
     tables.setWantsToPay(id, True)
 
-    return redirect("/table")
+    return redirect("/")
 
-@app.route("/haspaid/<id>", methods=["GET"])
-def haspaid(id):
+@app.route("/haspaid", methods=["POST"])
+def haspaid():
     # Waiter and admin only
     if session.get("userType") == "table":
         return redirect("/")
+    
+    if session["csrfToken"] != request.form["csrfToken"]:
+        abort(403)
+
+    id = request.form["tableId"]
 
     if orders.hasOrdersInProgress(id):
         return redirect("/")

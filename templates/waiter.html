@@ -9,14 +9,23 @@
     {% for order in orders if order[2] == 'new' %}
     <li>
         {{ order[4] }} at {{ order[1] }}<br />
-        <a href="/cancelorder/{{ order[0] }}">Cancel order</a><br />
-        <a href="/proceedorder/{{ order[0] }}">Accept order</a>
+        <form action="/cancelorder" method="POST">
+            <input type="hidden" name="csrfToken" value="{{ session.csrfToken }}">
+            <input name="orderId" type="hidden" value="{{ order[0] }}" />
+            <input type="submit" value="Cancel order" />
+        </form>
+        <form action="/proceedorder" method="POST">
+            <input type="hidden" name="csrfToken" value="{{ session.csrfToken }}">
+            <input name="orderId" type="hidden" value="{{ order[0] }}" />
+            <input type="submit" value="Accept order" />
+        </form>
         {% for orderItem in orderItems %}
-            {% if orderItem[0] == order[0] %}
-                <li>{{ orderItem[2] }} á {{ orderItem[3] }} €<br />x {{ orderItem[1] }} = {{ orderItem[1] *  orderItem[3] | round(2)}}</li>
-            {% endif %}
-        {% endfor %}
-        Order total: <span class="total">{{ orderTotals[order[0]] | round(2) }} €</span>
+        {% if orderItem[0] == order[0] %}
+    <li>{{ orderItem[2] }} á {{ orderItem[3] }} €<br />x {{ orderItem[1] }} = {{ orderItem[1] * orderItem[3] |
+        round(2)}}</li>
+    {% endif %}
+    {% endfor %}
+    Order total: <span class="total">{{ orderTotals[order[0]] | round(2) }} €</span>
     </li>
     {% endfor %}
 </ul>
@@ -27,13 +36,18 @@
     {% for order in orders if order[2] == 'inprogress' %}
     <li>
         {{ order[4] }} accepted at {{ order[5] }}</span><br />
-        <a href="/proceedorder/{{ order[0] }}">Complete order</a>
+        <form action="/proceedorder" method="POST">
+            <input type="hidden" name="csrfToken" value="{{ session.csrfToken }}">
+            <input name="orderId" type="hidden" value="{{ order[0] }}" />
+            <input type="submit" value="Complete order" />
+        </form>
         {% for orderItem in orderItems %}
-            {% if orderItem[0] == order[0] %}
-                <li>{{ orderItem[2] }} á {{ orderItem[3] }} €<br />x {{ orderItem[1] }} = {{ orderItem[1] *  orderItem[3] | round(2)}}</li>
-            {% endif %}
-        {% endfor %}
-        Order total: <span class="total">{{ orderTotals[order[0]] | round(2) }} €</span>
+        {% if orderItem[0] == order[0] %}
+    <li>{{ orderItem[2] }} á {{ orderItem[3] }} €<br />x {{ orderItem[1] }} = {{ orderItem[1] * orderItem[3] |
+        round(2)}}</li>
+    {% endif %}
+    {% endfor %}
+    Order total: <span class="total">{{ orderTotals[order[0]] | round(2) }} €</span>
     </li>
     {% endfor %}
 </ul>
@@ -45,11 +59,12 @@
     <li>
         {{ order[4] }} completed at {{ order[5] }}<br />
         {% for orderItem in orderItems %}
-            {% if orderItem[0] == order[0] %}
-                <li>{{ orderItem[2] }} á {{ orderItem[3] }} €<br />x {{ orderItem[1] }} = {{ orderItem[1] *  orderItem[3] | round(2)}}</li>
-            {% endif %}
-        {% endfor %}
-        Order total: <span class="total">{{ orderTotals[order[0]] | round(2) }} €</span>
+        {% if orderItem[0] == order[0] %}
+    <li>{{ orderItem[2] }} á {{ orderItem[3] }} €<br />x {{ orderItem[1] }} = {{ orderItem[1] * orderItem[3] |
+        round(2)}}</li>
+    {% endif %}
+    {% endfor %}
+    Order total: <span class="total">{{ orderTotals[order[0]] | round(2) }} €</span>
     </li>
     {% endfor %}
 </ul>
@@ -58,12 +73,16 @@
 
 <ul>
     {% for table in tables %}
-        <li>
-            {{ table[1] }}
-            {% if table[2] == True %}
-                <a href="/haspaid/{{ table[0] }}">Mark bill as paid</a>
-            {% endif %}
-        </li>
+    <li>
+        {{ table[1] }}
+        {% if table[2] == True %}
+        <form action="/haspaid" method="POST">
+            <input type="hidden" name="csrfToken" value="{{ session.csrfToken }}">
+            <input name="tableId" type="hidden" value="{{ table[0] }}" />
+            <input type="submit" value="Mark bill as paid" />
+        </form>
+        {% endif %}
+    </li>
     {% endfor %}
 </ul>
 

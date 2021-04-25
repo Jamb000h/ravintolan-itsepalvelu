@@ -50,3 +50,6 @@ def getMenuItemCategories():
     sql = "SELECT unnest(enum_range(NULL::menuItemCategory))"
     result = db.session.execute(sql)
     return result.fetchall()
+
+def validItem(itemName, itemPrice, itemDescription):
+    return len(itemName) > 5 and len(itemDescription) > 5 and float(itemPrice) >= 0

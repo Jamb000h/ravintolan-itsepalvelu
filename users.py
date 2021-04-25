@@ -100,3 +100,6 @@ def getTableUsersForTable(id):
     sql = "SELECT id, username FROM users WHERE userType = 'table' AND id NOT IN (SELECT userId FROM tables WHERE id != :id)"
     result = db.session.execute(sql, {"id": id})
     return result.fetchall()
+
+def validCredentials(username, password):
+    return len(username) > 5 and len(password) > 5
