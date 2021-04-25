@@ -46,6 +46,6 @@ For convenience, a list of default users have been created. Password is identica
 - table1
 
 ## TODO:
-- Menu items visible per section for admin (done for ordering already)
+- Validation error messages for users
 - Better styles
 - Deletion of things (maybe?)
