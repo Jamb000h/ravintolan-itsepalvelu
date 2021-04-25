@@ -5,15 +5,20 @@
 <form action="/order" method="POST">
 
     {% for menuItemCategory in menuItemCategories %}
-        <h2>{{menuItemCategory[0]|title}}s</h2>
+    <h2>{{menuItemCategory[0]|title}}s</h2>
+    <ul class="order__category">
         {% for menuItem in menuItems if menuItem[4] == menuItemCategory[0]%}
-            <input type="hidden" name="menuItemId" value="{{ menuItem[0] }}" />
-            <label for="menuItem{{ menuItem[0] }}">
-                {{ menuItem[1] }} á {{ menuItem[2] | round(2) }} €<br />
-                {{ menuItem[3] }} <br />
-                <input name="menuItemQty" id="menuItem{{ menuItem[0] }}" min="1" step="1" type="number"/>
-            </label><br /><br />
+            <li>
+                <input type="hidden" name="menuItemId" value="{{ menuItem[0] }}" />
+                <h3 class="order__itemName">{{ menuItem[1] }}</h3>
+                <p class="order__itemPrice">{{ menuItem[2] | round(2) }} €</p>
+                <p class="order__itemDescription">{{ menuItem[3] }}</p>
+                <label for="menuItem{{ menuItem[0] }}">
+                    Quantity: <input name="menuItemQty" id="menuItem{{ menuItem[0] }}" min="1" step="1" type="number" />
+                </label><br /><br />
+            </li>
         {% endfor %}
+    </ul>
     {% endfor %}
 
     <input type="hidden" name="csrfToken" value="{{ session.csrfToken }}">

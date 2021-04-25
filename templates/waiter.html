@@ -5,66 +5,104 @@
 
 <h2>New orders, oldest on top</h2>
 
-<ul>
+<ul class="orders">
     {% for order in orders if order[2] == 'new' %}
-    <li>
-        {{ order[4] }} at {{ order[1] }}<br />
-        <form action="/cancelorder" method="POST">
-            <input type="hidden" name="csrfToken" value="{{ session.csrfToken }}">
-            <input name="orderId" type="hidden" value="{{ order[0] }}" />
-            <input type="submit" value="Cancel order" />
-        </form>
-        <form action="/proceedorder" method="POST">
-            <input type="hidden" name="csrfToken" value="{{ session.csrfToken }}">
-            <input name="orderId" type="hidden" value="{{ order[0] }}" />
-            <input type="submit" value="Accept order" />
-        </form>
-        {% for orderItem in orderItems %}
-        {% if orderItem[0] == order[0] %}
-    <li>{{ orderItem[2] }} á {{ orderItem[3] }} €<br />x {{ orderItem[1] }} = {{ orderItem[1] * orderItem[3] |
-        round(2)}}</li>
-    {% endif %}
-    {% endfor %}
-    Order total: <span class="total">{{ orderTotals[order[0]] | round(2) }} €</span>
+    <li class="order">
+        <div class="order-header">
+            <div class="order-heading">
+                <h3>Table: {{ order[4] }}</h3>
+                <p>sent at {{ order[1].strftime('%Y-%m-%d %H:%M:%S') }}</p>
+            </div>
+            <div class="order-actions">
+    
+                <form action="/cancelorder" method="POST">
+                    <input type="hidden" name="csrfToken" value="{{ session.csrfToken }}">
+                    <input name="orderId" type="hidden" value="{{ order[0] }}" />
+                    <input type="submit" value="Cancel order" class="cancel-button" />
+                </form>
+                <form action="/proceedorder" method="POST">
+                    <input type="hidden" name="csrfToken" value="{{ session.csrfToken }}">
+                    <input name="orderId" type="hidden" value="{{ order[0] }}" />
+                    <input type="submit" value="Accept order" class="proceed-button" />
+                </form>
+            </div>
+        </div>
+        <div class="order-items">
+            <h4>Order items</h3>
+            <ul>
+                {% for orderItem in orderItems %}
+                {% if orderItem[0] == order[0] %}
+                <li>{{ orderItem[2] }} á {{ orderItem[3] }} €<br />x {{ orderItem[1] }} = {{ orderItem[1] * orderItem[3]
+                    |
+                    round(2)}}</li>
+                {% endif %}
+                {% endfor %}
+            </ul>
+        </div>
+        <p class="order-total">Order total: <span class="total">{{ orderTotals[order[0]] | round(2) }} €</span></p>
     </li>
     {% endfor %}
 </ul>
 
 <h2>Orders in progress, oldest on top</h2>
 
-<ul>
+<ul class="orders">
     {% for order in orders if order[2] == 'inprogress' %}
-    <li>
-        {{ order[4] }} accepted at {{ order[5] }}</span><br />
-        <form action="/proceedorder" method="POST">
-            <input type="hidden" name="csrfToken" value="{{ session.csrfToken }}">
-            <input name="orderId" type="hidden" value="{{ order[0] }}" />
-            <input type="submit" value="Complete order" />
-        </form>
-        {% for orderItem in orderItems %}
-        {% if orderItem[0] == order[0] %}
-    <li>{{ orderItem[2] }} á {{ orderItem[3] }} €<br />x {{ orderItem[1] }} = {{ orderItem[1] * orderItem[3] |
-        round(2)}}</li>
-    {% endif %}
-    {% endfor %}
-    Order total: <span class="total">{{ orderTotals[order[0]] | round(2) }} €</span>
+    <li class="order">
+        <div class="order-header">
+            <div class="order-heading">
+                <h3>Table: {{ order[4] }}</h3>
+                <p>accepted at {{ order[5].strftime('%Y-%m-%d %H:%M:%S') }}</p>
+            </div>
+            <div class="order-actions">
+                <form action="/proceedorder" method="POST">
+                    <input type="hidden" name="csrfToken" value="{{ session.csrfToken }}">
+                    <input name="orderId" type="hidden" value="{{ order[0] }}" />
+                    <input type="submit" value="Complete order" class="proceed-button" />
+                </form>
+            </div>
+        </div>
+        <div class="order-items">
+            <h4>Order items</h3>
+            <ul>
+                {% for orderItem in orderItems %}
+                {% if orderItem[0] == order[0] %}
+                <li>{{ orderItem[2] }} á {{ orderItem[3] }} €<br />x {{ orderItem[1] }} = {{ orderItem[1] * orderItem[3]
+                    | round(2)}}</li>
+                {% endif %}
+                {% endfor %}
+            </ul>
+        </div>
+        <p class="order-total">Order total: <span class="total">{{ orderTotals[order[0]] | round(2) }} €</span></p>
     </li>
     {% endfor %}
 </ul>
 
 <h2>Completed orders</h2>
 
-<ul>
+<ul class="orders">
     {% for order in orders if order[2] == 'completed' %}
-    <li>
-        {{ order[4] }} completed at {{ order[5] }}<br />
-        {% for orderItem in orderItems %}
-        {% if orderItem[0] == order[0] %}
-    <li>{{ orderItem[2] }} á {{ orderItem[3] }} €<br />x {{ orderItem[1] }} = {{ orderItem[1] * orderItem[3] |
-        round(2)}}</li>
-    {% endif %}
-    {% endfor %}
-    Order total: <span class="total">{{ orderTotals[order[0]] | round(2) }} €</span>
+    <li class="order">
+        <div class="order-header">
+            <div class="order-heading">
+                <h3>Table: {{ order[4] }}</h3>
+                <p>completed at {{ order[5].strftime('%Y-%m-%d %H:%M:%S') }}</p>
+            </div>
+        </div>
+        <div class="order-items">
+            <h4>Order items</h3>
+            <ul>
+                {% for orderItem in orderItems %}
+                {% if orderItem[0] == order[0] %}
+                    <li>{{ orderItem[2] }} á {{ orderItem[3] }} €<br />x {{ orderItem[1] }} = {{ orderItem[1] * orderItem[3]
+                        |
+                        round(2)}}</li>
+                    {% endif %}
+
+                    {% endfor %}
+            </ul>
+        </div>
+        <p class="order-total">Order total: <span class="total">{{ orderTotals[order[0]] | round(2) }} €</span></p>
     </li>
     {% endfor %}
 </ul>
@@ -79,7 +117,7 @@
         <form action="/haspaid" method="POST">
             <input type="hidden" name="csrfToken" value="{{ session.csrfToken }}">
             <input name="tableId" type="hidden" value="{{ table[0] }}" />
-            <input type="submit" value="Mark bill as paid" />
+            <input type="submit" value="Mark bill as paid" class="proceed-button" />
         </form>
         {% endif %}
     </li>

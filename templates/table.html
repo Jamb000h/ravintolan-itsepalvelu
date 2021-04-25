@@ -44,7 +44,7 @@
                 <form action="/cancelorder" method="POST">
                     <input type="hidden" name="csrfToken" value="{{ session.csrfToken }}">
                     <input name="orderId" type="hidden" value="{{ order[0] }}" />
-                    <input type="submit" value="Cancel order" />
+                    <input type="submit" value="Cancel order" class="cancel-button" />
                 </form>
                 {% endif %}
             </div>
@@ -55,7 +55,7 @@
                 {% for orderItem in orderItems %}
                 {% if orderItem[0] == order[0] %}
                 <li>{{ orderItem[2] }} á {{ orderItem[3] }} €<br />x {{ orderItem[1] }} = {{ orderItem[1] *
-                    orderItem[3] | round(2)}}</li>
+                    orderItem[3] | round(2)}} €</li>
                 {% endif %}
                 {% endfor %}
             </ul>

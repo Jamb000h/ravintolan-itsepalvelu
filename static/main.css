@@ -45,12 +45,18 @@ ul.orders {
     width: 100%;
     justify-content: space-between;
     align-items: flex-start;
+    margin-top: 1rem;
 }
 
 .order-heading {
     display: flex;
     justify-content: space-between;
-    align-items: center;
+    flex-direction: column;
+}
+
+.order-heading h3 {
+    margin-top: 0;
+    margin-bottom: 0;
 }
 
 .status {
@@ -85,6 +91,15 @@ a:visited {
     padding: 0 1rem 0 0;
 }
 
+.order-items ul {
+    list-style: none;
+    padding-left: 0;
+}
+
+.order-items li {
+    margin-bottom: 1rem;
+}
+
 .order-total {
     font-size: 1.2rem;
 }
@@ -95,4 +110,51 @@ h3 {
 
 h4 {
     margin-top: 0;
+}
+
+.order__category {
+    list-style: none;
+    padding: 0;
+    border-top: 1px solid lightgrey;
+}
+
+.order__category li {
+    border-bottom: 1px solid lightgrey;
+}
+
+.order__itemName {
+    font-size: 1.2rem;
+}
+
+[type="submit"] {
+    border: 1px solid lightgrey;
+    color: black;
+    border-radius: 5px;
+    padding: 5px;
+    font-weight: bold;
+}
+
+[type="submit"]:hover {
+    background-color: lightgrey;
+    cursor: pointer;
+}
+
+.cancel-button {
+    color: red;
+    background-color: white;
+}
+
+.cancel-button:hover {
+    background-color: red;
+    color: white;
+}
+
+.proceed-button {
+    color: green;
+    background-color: white;
+}
+
+.proceed-button:hover {
+    background-color: green;
+    color: white;
 }
