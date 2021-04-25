@@ -16,15 +16,15 @@ user = result.fetchone()
 if user is None:
     try:
         hash_value = generate_password_hash('admin1')
-        sql = "INSERT INTO users (username,password,userType) VALUES ('admin1',:password,'admin1')"
+        sql = "INSERT INTO users (username,password,userType) VALUES ('admin1',:password,'admin')"
         db.session.execute(sql, {"password": hash_value})
 
         hash_value = generate_password_hash('waiter1')
-        sql = "INSERT INTO users (username,password,userType) VALUES ('waiter1',:password,'waiter1')"
+        sql = "INSERT INTO users (username,password,userType) VALUES ('waiter1',:password,'waiter')"
         db.session.execute(sql, {"password": hash_value})
 
         hash_value = generate_password_hash('table1')
-        sql = "INSERT INTO users (username,password,userType) VALUES ('table1',:password,'table1')"
+        sql = "INSERT INTO users (username,password,userType) VALUES ('table1',:password,'table')"
         db.session.execute(sql, {"password": hash_value})
 
         db.session.commit()
