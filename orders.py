@@ -1,5 +1,5 @@
 from db import db
-from flask import session
+from flask import flash, session
 
 def order(tableId, menuItemIds, menuItemQuantities):
     # Check that the current user is the user for this table
@@ -7,8 +7,9 @@ def order(tableId, menuItemIds, menuItemQuantities):
     result = db.session.execute(sql, {"userId": session.get("userId")})
     table = result.fetchone()
 
-    # If wrong user or table wants to pay, don't allow ordering anymore
+    # If wrong user or table wants to pay, don't allow ordering
     if int(table[0]) != int(tableId) or table[1] == True:
+        flash("Wrong user! Please contact your waiter.")
         return
 
     try:

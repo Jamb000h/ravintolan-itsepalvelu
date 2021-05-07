@@ -1,4 +1,5 @@
 from db import db
+from flask import flash
 
 
 def addMenuItem(itemName, itemPrice, itemCategory, itemDescription):
@@ -44,6 +45,7 @@ def itemNameIsReserved(itemName):
     if not menuItem:
         return False
 
+    flash("Item name is already reserved.")
     return True
 
 def getMenuItemCategories():
@@ -52,4 +54,7 @@ def getMenuItemCategories():
     return result.fetchall()
 
 def validItem(itemName, itemPrice, itemDescription):
-    return len(itemName) > 5 and len(itemDescription) > 5 and float(itemPrice) >= 0
+    if len(itemName) < 6 or len(itemDescription) < 6 or float(itemPrice) < 0:
+        flash("Check item information. Name and description have minimum length of 5 characters and the price cannot be negative.")
+        return False
+    return True

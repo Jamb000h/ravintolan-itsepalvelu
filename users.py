@@ -1,12 +1,15 @@
 from db import db
-from flask import session
+from flask import flash, session
 from werkzeug.security import generate_password_hash, check_password_hash
 from os import urandom
 
 def login(username, password):
     user = getUserByUsername(username)
-    hash_value = user[2]
+    if user is None:
+        return False
 
+    hash_value = user[2]
+    
     if check_password_hash(hash_value, password):
         session["username"] = username
         session["userId"] = user[0]
@@ -102,4 +105,7 @@ def getTableUsersForTable(id):
     return result.fetchall()
 
 def validCredentials(username, password):
-    return len(username) > 5 and len(password) > 5
+    if len(username) < 6 or len(password) < 6:
+        flash("Username or password too short! Minimum length is 5 characters.")
+        return False
+    return True

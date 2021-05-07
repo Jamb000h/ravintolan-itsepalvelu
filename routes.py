@@ -1,5 +1,5 @@
 from app import app
-from flask import render_template, request, redirect, session
+from flask import flash, render_template, request, redirect, session
 import users, menu, tables, orders
 
 @app.route("/")
@@ -83,6 +83,7 @@ def editUser(id):
     user = users.getUserById(id)
 
     if user is None:
+        flash("User not found for id " + id)
         return redirect("/users")
 
     return render_template("editUser.html", user=user)
@@ -139,6 +140,7 @@ def editMenuItem(id):
     menuItem = menu.getMenuItemById(id)
 
     if menuItem is None:
+        flash("Menu item not found for id " + id)
         return redirect("/menu")
 
     return render_template("editMenuItem.html", menuItem=menuItem)
@@ -159,6 +161,7 @@ def listTables():
         tableUser = request.form["tableUser"]
 
         if len(tableName) < 6:
+            flash("Table name has a minimum length of 5 characters.")
             return redirect("/tables")
 
         tables.addTable(tableName, tableWaiter, tableUser)
@@ -184,6 +187,7 @@ def editTable(id):
         tableUser = request.form["tableUser"]
 
         if len(tableName) < 6:
+            flash("Table name has a minimum length of 5 characters.")
             return redirect("/tables"+id)
 
         tables.editTable(id, tableName, tableWaiter, tableUser)
@@ -232,6 +236,7 @@ def proceedOrder():
     order = orders.getOrderById(orderId)
 
     if not order:
+        flash("Order not found for orderId " + orderId)
         return redirect("/")
 
     currentStatus = order[1]
@@ -253,6 +258,7 @@ def cancelOrder():
     order = orders.getTableIdAndStatusForOrder(orderId)
 
     if not order:
+        flash("Order not found for orderId " + orderId)
         return redirect("/")
 
     if session.get("userType") == "table":
@@ -260,11 +266,14 @@ def cancelOrder():
         tableUserId = order[0]
 
         if int(tableUserId) != int(session.get("userId")):
+            flash("Wrong user! Please contact your waiter.")
             return redirect("/")
 
     # Only orders with status "new" can be cancelled
     if order[1] == "new":
         orders.updateOrderStatus(orderId, "cancelled")
+    else:
+        flash("Could not cancel order as it has been accepted or completed already.")
 
     return redirect("/")
 

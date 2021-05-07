@@ -1,5 +1,5 @@
 from db import db
-from flask import session
+from flask import flash, session
 import users
 
 def addTable(tableName, tableWaiter, tableUser):
@@ -8,15 +8,18 @@ def addTable(tableName, tableWaiter, tableUser):
 
     # Check waiter
     if not users.getUserByTypeAndId("waiter", tableWaiter):
+        flash("Waiter is invalid")
         return
 
     # Check table user
     if not users.getUserByTypeAndId("table", tableUser):
+        flash("Table user is invalid")
         return
 
     # Check that the table user is free
     tablesForUser = getTablesForTableUser(tableUser)
     if len(tablesForUser) > 0:
+        flash("Table user is already reserved for a table")
         return
 
     try:
@@ -62,6 +65,7 @@ def tableNameIsReserved(tableName):
     if not table:
         return False
 
+    flash("Table name is already reserved.")
     return True
 
 def getTablesForTableUser(tableUser):

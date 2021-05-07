@@ -158,3 +158,14 @@ h4 {
     background-color: green;
     color: white;
 }
+
+.flashes {
+    padding: 1rem;
+    border: solid 1px red;
+    color: red;
+    list-style: none;
+}
+
+.flashes li:not(:last-child) {
+    margin-bottom: 0.5rem;
+}
