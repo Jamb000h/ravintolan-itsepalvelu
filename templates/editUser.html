@@ -2,7 +2,6 @@
 {% block title %}Edit {{ user[1] }}{% endblock %}
 {% block content %}
 <h1>Editing {{ user[1] }}</h1>
-<a href="">TODO: delete user</a>
 <form action="/users/{{ user[0] }}" method="POST">
     <label for="username">
         Username:

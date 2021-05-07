@@ -44,8 +44,3 @@ For convenience, a list of default users have been created. Password is identica
 - admin1
 - waiter1
 - table1
-
-## TODO:
-- Validation error messages for users
-- Better styles
-- Deletion of things (maybe?)
